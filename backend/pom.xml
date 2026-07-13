@@ -81,6 +81,11 @@
 			<artifactId>checkstyle</artifactId>
 			<version>10.21.4</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.pmd</groupId>
+			<artifactId>pmd-java</artifactId>
+			<version>7.10.0</version>
+		</dependency>
 	</dependencies>
 
 
