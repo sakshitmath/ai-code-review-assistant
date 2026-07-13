@@ -25,6 +25,7 @@ public class StaticAnalysisService {
     private final ProjectService projectService;
     private final CheckstyleService checkstyleService;
     private final PmdService pmdService;
+    private final SpotBugsService spotBugsService;
     private final ReviewRepository reviewRepository;
     private final ReviewFindingRepository findingRepository;
 
@@ -42,6 +43,7 @@ public class StaticAnalysisService {
         List<ReviewFinding> allFindings = new ArrayList<>();
         allFindings.addAll(checkstyleService.analyze(project.getStoragePath(), savedReview));
         allFindings.addAll(pmdService.analyze(project.getStoragePath(), savedReview));
+        allFindings.addAll(spotBugsService.analyze(project.getStoragePath(), savedReview));
 
         findingRepository.saveAll(allFindings);
 

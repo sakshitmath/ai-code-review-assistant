@@ -86,6 +86,11 @@
 			<artifactId>pmd-java</artifactId>
 			<version>7.10.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.spotbugs</groupId>
+			<artifactId>spotbugs</artifactId>
+			<version>4.8.6</version>
+		</dependency>
 	</dependencies>
 
 
