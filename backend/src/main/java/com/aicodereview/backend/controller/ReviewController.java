@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.aicodereview.backend.service.AiReviewService;
 
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,19 @@ import java.util.Map;
 public class ReviewController {
 
     private final StaticAnalysisService staticAnalysisService;
+    private final AiReviewService aiReviewService;
 
     @PostMapping("/static/{projectId}")
     public ResponseEntity<ReviewResponse> runStaticAnalysis(
             Authentication auth,
             @PathVariable Long projectId) {
         return ResponseEntity.ok(staticAnalysisService.runStaticAnalysis(auth.getName(), projectId));
+    }
+    @PostMapping("/ai/{projectId}")
+    public ResponseEntity<ReviewResponse> runAiReview(
+            Authentication auth,
+            @PathVariable Long projectId) {
+        return ResponseEntity.ok(aiReviewService.runAiReview(auth.getName(), projectId));
     }
 
     @GetMapping("/project/{projectId}")
