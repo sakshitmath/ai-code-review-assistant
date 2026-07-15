@@ -65,6 +65,12 @@ function Dashboard() {
         <div className="flex items-center gap-4">
           <span className="text-slate-300 text-sm">Hi, {name}</span>
           <button
+            onClick={() => navigate("/profile")}
+            className="bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded-lg transition"
+          >
+            Profile
+          </button>
+          <button
             onClick={handleLogout}
             className="bg-slate-700 hover:bg-slate-600 text-sm px-3 py-1.5 rounded-lg transition"
           >
