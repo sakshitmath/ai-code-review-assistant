@@ -43,23 +43,38 @@ public class GeminiService {
                 )
         );
 
-        try {
-            String response = webClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                String response = webClient.post()
+                        .uri(apiUrl)
+                        .header("Authorization", "Bearer " + apiKey)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(requestBody)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
 
-            return extractText(response);
+                return extractText(response);
 
-        } catch (ApiException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiException("Groq API call failed: " + e.getMessage());
+            } catch (ApiException e) {
+                throw e;
+            } catch (Exception e) {
+                String msg = e.getMessage() == null ? "" : e.getMessage();
+                boolean rateLimited = msg.contains("429");
+
+                if (rateLimited && attempt < maxAttempts) {
+                    try {
+                        Thread.sleep(3000L * attempt);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue;
+                }
+                throw new ApiException("Groq API call failed: " + msg);
+            }
         }
+        throw new ApiException("Groq API call failed after retries");
     }
 
     private String extractText(String rawResponse) {
