@@ -43,8 +43,12 @@ public class StaticAnalysisService {
         List<ReviewFinding> allFindings = new ArrayList<>();
         allFindings.addAll(checkstyleService.analyze(project.getStoragePath(), savedReview));
         allFindings.addAll(pmdService.analyze(project.getStoragePath(), savedReview));
-        allFindings.addAll(spotBugsService.analyze(project.getStoragePath(), savedReview));
-
+        try {
+            allFindings.addAll(spotBugsService.analyze(project.getStoragePath(), savedReview));
+        } catch (Throwable t) {
+            // SpotBugs can fail to initialize in some server environments.
+            // Skip it gracefully so Checkstyle and PMD still produce results.
+        }
         findingRepository.saveAll(allFindings);
 
         int score = calculateScore(allFindings);
