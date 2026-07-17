@@ -18,6 +18,7 @@ function AnalysisPanel({ project }) {
   const [complexity, setComplexity] = useState(null);
   const [docs, setDocs] = useState(null);
   const [history, setHistory] = useState([]);
+  const [severityFilter, setSeverityFilter] = useState("ALL");
 
   const loadHistory = async () => {
     try {
@@ -95,6 +96,11 @@ function AnalysisPanel({ project }) {
       setLoading(false);
     }
   };
+  const filteredFindings = review
+    ? review.findings.filter(
+        (f) => severityFilter === "ALL" || f.severity === severityFilter
+      )
+    : [];
 
   const severityColor = (sev) => {
     if (sev === "HIGH") return "text-red-400 bg-red-500/10 border-red-500/30";
@@ -189,8 +195,25 @@ function AnalysisPanel({ project }) {
             </p>
           )}
 
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-slate-400 text-xs">Filter:</span>
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-emerald-500"
+            >
+              <option value="ALL">All severities</option>
+              <option value="HIGH">High only</option>
+              <option value="MEDIUM">Medium only</option>
+              <option value="LOW">Low only</option>
+            </select>
+            <span className="text-slate-500 text-xs">
+              ({filteredFindings.length} shown)
+            </span>
+          </div>
+
           <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-            {review.findings.map((f) => (
+            {filteredFindings.map((f) => (
               <div
                 key={f.id}
                 className="bg-slate-900 rounded-lg p-3 border border-slate-700"
@@ -246,9 +269,50 @@ function AnalysisPanel({ project }) {
 
       {/* DOCS RESULTS */}
       {!loading && docs && (
-        <pre className="text-slate-300 text-xs bg-slate-900 rounded-lg p-4 max-h-96 overflow-y-auto whitespace-pre-wrap">
-          {docs}
-        </pre>
+        <div>
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => {
+                const win = window.open("", "_blank");
+                win.document.write(`
+                  <html>
+                    <head>
+                      <title>${project.projectName} - Documentation</title>
+                      <style>
+                        body { font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+                               max-width: 800px; margin: 40px auto; padding: 0 20px;
+                               line-height: 1.6; color: #1e293b; }
+                        h1 { color: #059669; border-bottom: 2px solid #059669; padding-bottom: 8px; }
+                        h2 { color: #0f766e; margin-top: 28px; }
+                        h3 { color: #334155; }
+                        code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px;
+                               font-family: monospace; font-size: 90%; }
+                        pre { background: #f8fafc; padding: 16px; border-radius: 8px;
+                              border: 1px solid #e2e8f0; overflow-x: auto; }
+                        ul { padding-left: 22px; }
+                        .header { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 30px; }
+                      </style>
+                    </head>
+                    <body>
+                      <div class="header">AI Code Review Assistant — Generated Documentation</div>
+                      <pre style="white-space: pre-wrap; background: white; border: none; padding: 0;">${docs
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")}</pre>
+                    </body>
+                  </html>
+                `);
+                win.document.close();
+              }}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition"
+            >
+              Open / Print as PDF
+            </button>
+          </div>
+          <pre className="text-slate-300 text-xs bg-slate-900 rounded-lg p-4 max-h-96 overflow-y-auto whitespace-pre-wrap">
+            {docs}
+          </pre>
+        </div>
       )}
 
       {/* REVIEW HISTORY */}
